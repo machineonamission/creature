@@ -142,16 +142,20 @@ Array.prototype.sample = function () {
     return this[Math.floor(Math.random() * this.length)];
 }
 let audio = new Audio();
+audio.preload = "auto";
 let audioinit = false;
 
 function play() {
+    audio.pause();
     audio.src = audios.sample();
-    audio.autoplay = true;
-    audio.play();
-    audio.addEventListener("ended", play)
+    audio.load();
+    audio.play().finally(() => {
+        audio.addEventListener("ended", play)
+    });
 }
 
 function audioclick() {
+
     if (!audioinit) {
         audioinit = true;
         play();
@@ -164,4 +168,7 @@ function audioclick() {
     }
 }
 
-document.addEventListener("click", audioclick)
+document.addEventListener("click", (e) => {
+    e.preventDefault()
+    audioclick()
+})
