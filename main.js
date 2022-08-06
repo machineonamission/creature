@@ -1,6 +1,7 @@
 import * as THREE from "./libs/three.module.js";
 import {GLTFLoader} from './libs/GLTFLoader.js';
 import {EXRLoader} from "./libs/EXRLoader.js";
+import {Quaternion} from "./libs/three.module.js";
 
 const scene = new THREE.Scene();
 
@@ -31,6 +32,9 @@ function applyenvmap() {
             child.material.needsUpdate = true;
         }
     });
+    document.querySelector("#loading").remove()
+    scene.add(fellow)
+    ready = true;
 }
 
 
@@ -54,11 +58,12 @@ new EXRLoader()
 // load the fellow
 const loader = new GLTFLoader();
 let fellow;
-loader.load('./tbh-character-autism-creature.glb', function (gltf) {
+let ready = false;
+loader.load('./tbh-creature-fixed.glb', function (gltf) {
     fellow = gltf.scene;
     applyenvmap()
-    scene.add(fellow);
-    console.debug(fellow)
+    // scene.add(fellow);
+    // console.debug(fellow)
 }, console.debug, console.error);
 
 
@@ -85,7 +90,11 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 }
 
-function rainbowatpoint(i) {
+function randomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function rawbowatpoint(i) {
     // weird constant brightness rainbow, feels less jank
     // from https://krazydad.com/tutorials/makecolors.php
     const waveintensity = .25;
@@ -94,12 +103,34 @@ function rainbowatpoint(i) {
     let red = Math.sin(frequency * i) * waveintensity + waveheight;
     let green = Math.sin((frequency * i) + (2 * Math.PI / 3)) * waveintensity + waveheight;
     let blue = Math.sin((frequency * i) + (4 * Math.PI / 3)) * waveintensity + waveheight;
-    return new THREE.Color(red, green, blue)
+    return [red, green, blue]
 }
 
-let rainbow = 0;
+function rainbowatpoint(i) {
+    return new THREE.Color(...rawbowatpoint(i))
+}
+
+function rbowgatpoint(i) {
+    const rb = rawbowatpoint(i)
+    return `rgb(${rb[0] * 255},${rb[1] * 255},${rb[2] * 255})`
+}
+
 const start = Date.now();
 let last = start;
+
+function arrayfromfunc(len, func) {
+    return Array.from({length: len}, func);
+}
+
+// random smooth 3vectors to convert to euler to convert to rotations
+const curve = new THREE.CatmullRomCurve3(
+    arrayfromfunc(100, () =>
+        new THREE.Vector3(...arrayfromfunc(3, () => randomFloat(-1, 1)))
+    ),
+    true,
+    "centripetal",
+    0.4
+);
 
 function animate() {
     // frame delta calculations
@@ -108,19 +139,18 @@ function animate() {
     last = Date.now();
 
     // rotate the fellow
-    if (fellow) {
-        fellow.applyQuaternion(new THREE.Quaternion().setFromEuler(
-                new THREE.Euler(
-                    0.009 * delta * (60 / 1000),
-                    -0.011 * delta * (60 / 1000),
-                    0.01 * delta * (60 / 1000))
-            )
+    if (ready) {
+        // NORMALIZE the vector to keep the rotation speed constant!! (well idk constant but never 0) tbh never stops...
+        let randvec = curve.getPoint(elapsed / 1000 / 300).normalize().multiplyScalar(0.02)
+        fellow.applyQuaternion(
+            new THREE.Quaternion().setFromEuler(new THREE.Euler().setFromVector3(randvec))
         )
+    } else {
+        document.getElementById("loading").style.color = rbowgatpoint((elapsed / 1000 / 20) + 0.5)
     }
 
     // funny rainbow
     renderer.setClearColor(rainbowatpoint(elapsed / 1000 / 20), 1);
-    if (rainbow > 1) rainbow -= 1; // probably fixes float fuckery
 
     // render
     requestAnimationFrame(animate);
@@ -130,6 +160,7 @@ function animate() {
 document.body.appendChild(renderer.domElement);
 animate();
 
+/*
 const audios = [
     "./music/Beachwalk (Zen Remix) [lzNpXqvm0_g].m4a",
     "./music/Blank Banshee - Mindtrap [wOhvbXLsLrI].m4a",
@@ -172,3 +203,4 @@ document.addEventListener("click", (e) => {
     e.preventDefault()
     audioclick()
 })
+*/
