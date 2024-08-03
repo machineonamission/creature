@@ -1,7 +1,5 @@
 import * as THREE from "./libs/three.module.js";
 import {GLTFLoader} from './libs/GLTFLoader.js';
-import {EXRLoader} from "./libs/EXRLoader.js";
-import {Quaternion} from "./libs/three.module.js";
 import {RoomEnvironment} from "./libs/RoomEnvironment.min.js";
 
 const scene = new THREE.Scene();
