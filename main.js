@@ -113,7 +113,7 @@ function animate() {
     // rotate the fellow
     if (ready) {
         // NORMALIZE the vector to keep the rotation speed constant!! (well idk constant but never 0) tbh never stops...
-        let randvec = curve.getPoint(elapsed / 1000 / 300).normalize().multiplyScalar(0.02)
+        let randvec = curve.getPoint(elapsed / 1000 / 300).normalize().multiplyScalar(delta / 1000);
         fellow.applyQuaternion(
             new THREE.Quaternion().setFromEuler(new THREE.Euler().setFromVector3(randvec))
         )
