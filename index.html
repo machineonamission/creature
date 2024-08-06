@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <meta content="creature" property="og:title" />
-    <meta content="creature" property="og:description" />
-    <meta content="https://reticivis.net/creature" property="og:url" />
-    <meta content="https://reticivis.net/creature/tbh%20creature.png" property="og:image" />
-    <meta content="#ffffff" data-react-helmet="true" name="theme-color" />
+    <meta content="creature" property="og:title"/>
+    <meta content="creature" property="og:description"/>
+    <meta content="https://reticivis.net/creature" property="og:url"/>
+    <meta content="https://reticivis.net/creature/tbh%20creature.png" property="og:image"/>
+    <meta content="#ffffff" data-react-helmet="true" name="theme-color"/>
 
     <link rel="icon" type="image/png" href="./tbh%20creature.png"/>
     <script async src="libs/es-module-shims.js"></script>
     <script type="importmap">
-  {
-    "imports": {
-      "three": "./libs/three.module.js",
-      "cubic-spline": "./libs/cubic.js"
-    }
-  }
+        {
+          "imports": {
+            "three": "./libs/three.module.js"
+          }
+        }
 
     </script>
     <style>
@@ -27,6 +26,7 @@
             /*height: 100%;*/
             overflow: hidden;
         }
+
         #loading {
             position: absolute;
             height: 100%;
@@ -36,7 +36,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            color:white;
+            color: white;
             font-family: sans-serif;
             font-weight: bold;
         }
@@ -44,6 +44,7 @@
 
     <script type="module" src="main.js"></script>
     <title>creature</title>
+    <meta name="darkreader-lock">
 </head>
 <body>
 <p id="loading">Loading...</p>

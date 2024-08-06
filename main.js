@@ -1,7 +1,6 @@
 import * as THREE from "./libs/three.module.js";
 import {GLTFLoader} from './libs/GLTFLoader.js';
-import {EXRLoader} from "./libs/EXRLoader.js";
-import {Quaternion} from "./libs/three.module.js";
+import {RoomEnvironment} from "./libs/RoomEnvironment.min.js";
 
 const scene = new THREE.Scene();
 
@@ -21,39 +20,8 @@ light.position.set(0, 0, 5);
 
 // scene.add(light);
 
-function applyenvmap() {
-    // this'll be called twice so both the fellow and the env map can load at once, on the 2nd call they'll both be
-    // loaded and the map will actually be applied
-    if (!envmap || !fellow) return
-    fellow.traverse(function (child) {
-        if (child instanceof THREE.Mesh) {
-            child.material.envMapIntensity = 2.0;
-            child.material.envMap = envmap;
-            child.material.needsUpdate = true;
-        }
-    });
-    document.querySelector("#loading").remove()
-    scene.add(fellow)
-    ready = true;
-}
-
-
-// load the environment map
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
-pmremGenerator.compileEquirectangularShader();
-let exrCubeRenderTarget, exrBackground;
-let envmap;
-new EXRLoader()
-    // .setDataType(THREE.UnsignedByteType)
-    .load(
-        "./lilienstein_1k.exr",
-        function (texture) {
-            exrCubeRenderTarget = pmremGenerator.fromEquirectangular(texture);
-            exrBackground = exrCubeRenderTarget.texture;
-            envmap = exrCubeRenderTarget ? exrCubeRenderTarget.texture : null;
-            applyenvmap()
-        }
-    );
+scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0).texture;
 
 // load the fellow
 const loader = new GLTFLoader();
@@ -61,7 +29,9 @@ let fellow;
 let ready = false;
 loader.load('./tbh-creature-fixed.glb', function (gltf) {
     fellow = gltf.scene;
-    applyenvmap()
+    document.querySelector("#loading").remove()
+    scene.add(fellow)
+    ready = true;
     // scene.add(fellow);
     // console.debug(fellow)
 }, console.debug, console.error);
@@ -141,7 +111,7 @@ function animate() {
     // rotate the fellow
     if (ready) {
         // NORMALIZE the vector to keep the rotation speed constant!! (well idk constant but never 0) tbh never stops...
-        let randvec = curve.getPoint(elapsed / 1000 / 300).normalize().multiplyScalar(0.02)
+        let randvec = curve.getPoint(elapsed / 1000 / 300).normalize().multiplyScalar(delta / 1000);
         fellow.applyQuaternion(
             new THREE.Quaternion().setFromEuler(new THREE.Euler().setFromVector3(randvec))
         )
